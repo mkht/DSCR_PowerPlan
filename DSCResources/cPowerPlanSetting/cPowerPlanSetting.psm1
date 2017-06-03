@@ -30,7 +30,8 @@ function Get-TargetResource
     )
     $ErrorActionPreference = 'Stop'
 
-    $Setting = Get-PowerPlanSetting -PlanGuid $PlanGuid -SettingGuid $SettingGuid
+    Write-Verbose "Retrieving Power settings. { PlanGuid: $PlanGuid | SettingGuid: $SettingGuid }"
+    $Setting = Get-PowerPlanSetting -PlanGuid $PlanGuid -SettingGuid $SettingGuid -Verbose:$false
 
     $returnValue = @{
         SettingGuid = $Setting.SettingGuid
@@ -39,6 +40,7 @@ function Get-TargetResource
         ACValue = $Setting.ACValue
         DCValue = $Setting.DCValue
     }
+    Write-Verbose ("Current setting (AC: {0} | DC: {1})" -f $Setting.ACValue, $Setting.DCValue)
 
     $returnValue
 } # end of Get-TargetResource
@@ -70,6 +72,7 @@ function Set-TargetResource
 
     try{
         Set-PowerPlanSetting @PSBoundParameters
+        Write-Verbose "Power setting has been changed successfully. { PlanGuid: $PlanGuid | SettingGuid: $SettingGuid | Value: $Value | AcDc: $AcDc }"
     }
     catch{
         Write-Error $_.Exception.Message
@@ -102,23 +105,49 @@ function Test-TargetResource
         $AcDc = 'Both'
     )
     $ErrorActionPreference = 'Stop'
+    $Result = $false
+    $Current = $null
+
+    Write-Verbose "Test started. { PlanGuid: $PlanGuid | SettingGuid: $SettingGuid | Value: $Value | AcDc: $AcDc }"
     try{
         $cState = (Get-TargetResource @PSBoundParameters)
         switch ($AcDc) {
             'AC' {
-                return ($cState.ACValue -eq $Value)
+                $Result = ($cState.ACValue -eq $Value)
+                $Current = $cState.ACValue
             }
             'DC' {
-                return ($cState.DCValue -eq $Value)
+                $Result = ($cState.DCValue -eq $Value)
+                $Current = $cState.DCValue
             }
             Default {
-                return (($cState.DCValue -eq $Value) -and ($cState.ACValue -eq $Value))
+                if($cState.ACValue -ne $Value){
+                    $Result = $false
+                    $Current = $cState.ACValue
+                }
+                elseif($cState.DCValue -ne $Value){
+                    $Result = $false
+                    $Current = $cState.DCValue
+                }
+                else{
+                    $Result = $true
+                    $Current = $cState.ACValue
+                }
             }
         }
     }
     catch{
         Write-Error $_.Exception.Message
     }
+
+    if($Result){
+        Write-Verbose ('[PASSED] Current: {0} / Desired : {1}' -f $Current, $Value)
+    }
+    else{
+        Write-Verbose ('[FAILED] Current: {0} / Desired : {1}' -f $Current, $Value)
+    }
+
+    $Result
 } # end of Test-TargetResource
 
 
@@ -220,6 +249,8 @@ function Set-PowerPlanSetting {
 
         [switch]$PassThru
     )
+
+    $local:VerbosePreference = "SilentlyContinue"
 
     if($PowerPlanAliases.ContainsKey($PlanGuid)){
         $PlanGuid = $PowerPlanAliases.$PlanGuid
