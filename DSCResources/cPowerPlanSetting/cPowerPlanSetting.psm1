@@ -183,10 +183,10 @@ function Get-PowerPlanSetting {
         $SettingGuid
     )
 
-    if($PowerPlanAliases.ContainsKey($PlanGuid)){
+    if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($PlanGuid)){
         $PlanGuid = $PowerPlanAliases.$PlanGuid
     }
-    if($PowerPlanSettingAliases.ContainsKey($SettingGuid)){
+    if($PowerPlanSettingAliases -and $PowerPlanSettingAliases.ContainsKey($SettingGuid)){
         $SettingGuid = $PowerPlanSettingAliases.$SettingGuid
     }
     $PlanGuid = $PlanGuid -replace '[{}]'
@@ -252,10 +252,10 @@ function Set-PowerPlanSetting {
 
     $local:VerbosePreference = "SilentlyContinue"
 
-    if($PowerPlanAliases.ContainsKey($PlanGuid)){
+    if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($PlanGuid)){
         $PlanGuid = $PowerPlanAliases.$PlanGuid
     }
-    if($PowerPlanSettingAliases.ContainsKey($SettingGuid)){
+    if($PowerPlanSettingAliases -and $PowerPlanSettingAliases.ContainsKey($SettingGuid)){
         $SettingGuid = $PowerPlanSettingAliases.$SettingGuid
     }
     $PlanGuid = $PlanGuid -replace '[{}]'

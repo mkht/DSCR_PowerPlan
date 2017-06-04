@@ -30,7 +30,7 @@ function Get-TargetResource
     $ErrorActionPreference = 'Stop'
 
     Write-Verbose "Retrieving Power Plan. { GUID: $GUID }"
-    if($PowerPlanAliases.ContainsKey($GUID)){
+    if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)){
         $GUID = $PowerPlanAliases.$GUID
     }
 
@@ -87,7 +87,7 @@ function Set-TargetResource
     )
     $ErrorActionPreference = 'Stop'
 
-    if($PowerPlanAliases.ContainsKey($GUID)){
+    if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)){
         $GUID = $PowerPlanAliases.$GUID
     }
 
@@ -212,7 +212,7 @@ function Test-TargetResource
     )
 
     Write-Verbose "Test started. { Ensure: $Ensure | GUID: $GUID | Name: $Name | Description: $Description | Active: $Active }"
-    if($PowerPlanAliases.ContainsKey($GUID)){
+    if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)){
         $GUID = $PowerPlanAliases.$GUID
     }
 
@@ -254,7 +254,7 @@ function Get-PowerPlan {
         [string]$GUID
     )
 
-    if($PowerPlanAliases.ContainsKey($GUID)){
+    if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)){
         $GUID = $PowerPlanAliases.$GUID
     }
 
