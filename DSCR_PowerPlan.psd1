@@ -27,7 +27,7 @@
     Copyright            = '(c) 2017 mkht. All rights reserved.'
 
     # このモジュールの機能の説明
-    Description          = 'PowerShell DSC Resource for Power plan settings.'
+    Description          = 'PowerShell DSC Resource for Power Plan configuration'
 
     # このモジュールに必要な Windows PowerShell エンジンの最小バージョン
     PowerShellVersion    = '5.0'
