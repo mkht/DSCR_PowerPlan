@@ -105,6 +105,6 @@ Configuration Example1
 ```
 
 ## ChangeLog
-### Unreleased
+### 1.0.0
 + Add "Description" property for cPowerPLan
 + bug fix
