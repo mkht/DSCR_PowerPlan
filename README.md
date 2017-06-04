@@ -39,7 +39,7 @@ PowerShell DSC Resource for change Power settings & options.
 + [String] **SettingGuid** (Key):
     + The GUID of Power Setting.
     + You can obtain GUIDs by executing `powercfg.exe /Q` command
-    + You can also use some aliases. The list of aliases is here.
+    + You can also use some aliases. The list of aliases is [here](https://github.com/mkht/DSCR_PowerPlan/blob/master/DSCResources/cPowerPlanSetting/DATA/GUID_LIST_SETTING).
 
 + [String] **PlanGuid** (Key):
     + The GUID of target Power Plan.
