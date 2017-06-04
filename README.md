@@ -26,6 +26,9 @@ PowerShell DSC Resource for change Power settings & options.
 + [String] **Name** (Required):
     + The Name of Power Plan.
 
++ [String] **Description** (Write):
+    + The Description of Power Plan.
+
 + [String] **GUID** (Key):
     + The GUID of Power Plan.
     + If you want to create Original Plan, should specify unique GUID.
@@ -80,6 +83,7 @@ Configuration Example2
         Ensure = "Present"
         GUID   = "ad98b5c7-06a1-493f-b611-da04c574e8b5"   # Unique GUID
         Name   = "PlanA"
+        Description = "This is original Power Plan"
     }
 }
 ```
@@ -101,4 +105,6 @@ Configuration Example1
 ```
 
 ## ChangeLog
-
+### Unreleased
++ Add "Description" property for cPowerPLan
++ bug fix

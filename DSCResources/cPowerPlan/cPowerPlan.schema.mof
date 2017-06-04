@@ -3,8 +3,9 @@
 class cPowerPlan : OMI_BaseResource
 {
     [Write, ValueMap{"Present","Absent"}, Values{"Present","Absent"}] String Ensure;
-    [Required] String Name;
     [Key] String GUID;
+    [Required] String Name;
+    [Write] String Description;
     [Write] Boolean Active;
 };
 

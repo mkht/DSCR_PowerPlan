@@ -20,6 +20,10 @@ function Get-TargetResource
         [string]
         $Name,
 
+        [parameter()]
+        [string]
+        $Description,
+
         [bool]
         $Active = $false
     )
@@ -34,22 +38,25 @@ function Get-TargetResource
     if(-not $Plan){
         $Ensure = 'Absent'
         $Name = ''
+        $Description = ''
         $Active = $false
     }
     else{
         $Ensure = 'Present'
         $Name = $Plan.ElementName
+        $Description = $Plan.Description
         $Active = $Plan.IsActive
     }
 
     $returnValue = @{
-        Ensure = $Ensure
-        GUID = $GUID
-        Name = $Name
-        Active = $Active
+        Ensure      = [string]$Ensure
+        GUID        = [string]$GUID
+        Name        = [string]$Name
+        Description = [string]$Description
+        Active      = [bool]$Active
     }
 
-    Write-Verbose ("Current setting ( Ensure: {0} | GUID: {1} | Name: {2} | Active: {3} )" -f $returnValue.Ensure,$returnValue.GUID,$returnValue.Name,$returnValue.Active)
+    Write-Verbose ("Current state ( Ensure: {0} | GUID: {1} | Name: {2} | Description: {3} | Active: {4} )" -f $returnValue.Ensure,$returnValue.GUID,$returnValue.Name,$returnValue.Description,$returnValue.Active)
     $returnValue
 } # end of Get-TargetResource
 
@@ -70,6 +77,10 @@ function Set-TargetResource
         [parameter(Mandatory = $true)]
         [string]
         $Name,
+
+        [parameter()]
+        [string]
+        $Description,
 
         [bool]
         $Active = $false
@@ -109,7 +120,12 @@ function Set-TargetResource
             if($Plan = Get-PowerPlan $GUID -Verbose:$false){
                 $PlanGUID = $Plan.InstanceId.Split('\')[1] -replace '[{}]'
                 if($Plan.ElementName -ne $Name){
-                    $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/CHANGENAME {0} "{1}"' -f $PlanGUID, $Name)).ExitCode
+                    if($PSBoundParameters.ContainsKey('Description')){
+                        $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/CHANGENAME {0} "{1}" "{2}"' -f $PlanGUID, $Name, $Description)).ExitCode
+                    }
+                    else{
+                        $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/CHANGENAME {0} "{1}"' -f $PlanGUID, $Name)).ExitCode
+                    }
                     if($ExitCode -ne 0){
                         Write-Error 'Error occured when changing the name of Power Plan'
                     }
@@ -146,7 +162,7 @@ function Set-TargetResource
                     Write-Error "Couldn't create the Power Plan"
                 }
 
-                $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/CHANGENAME {0} "{1}"' -f $GUID, $Name)).ExitCode
+                $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/CHANGENAME {0} "{1}" "{2}"' -f $GUID, $Name, $Description)).ExitCode
                 if($ExitCode -ne 0){
                     Write-Error 'Error occured when changing the name of Power Plan'
                 }
@@ -187,11 +203,15 @@ function Test-TargetResource
         [string]
         $Name,
 
+        [parameter()]
+        [string]
+        $Description,
+
         [bool]
         $Active = $false
     )
 
-    Write-Verbose "Test started. { Ensure: $Ensure | GUID: $GUID | Name: $Name | Active: $Active }"
+    Write-Verbose "Test started. { Ensure: $Ensure | GUID: $GUID | Name: $Name | Description: $Description | Active: $Active }"
     if($PowerPlanAliases.ContainsKey($GUID)){
         $GUID = $PowerPlanAliases.$GUID
     }
@@ -199,17 +219,17 @@ function Test-TargetResource
     $Result = $false
     try{
         $cState = (Get-TargetResource @PSBoundParameters)
-        $ret =  $cState.Ensure -eq $Ensure
-        if($Ensure -eq 'Absent'){
-            $Result = $ret
+        if ($Ensure -ne $cState.Ensure) {
+            $Result = $false
         }
-        else{
-            if($ret){
-                $Result = (($cState.Active -eq $Active) -and ($cState.Name -eq $Name))
+        elseif ($Ensure -eq 'Present') {
+            $Result = (($Active -eq $cState.Active) -and ($Name.Equals($cState.Name)))
+            if ($PSBoundParameters.ContainsKey('Description')) {
+                $Result = ($Result -and ($Description.Equals($cState.Description)))
             }
-            else{
-                $Result =  $false
-            }
+        }
+        else {
+            $Result = $true
         }
     }
     catch{
