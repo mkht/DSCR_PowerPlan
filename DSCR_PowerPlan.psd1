@@ -51,7 +51,7 @@
     AliasesToExport      = @()
 
     # このモジュールからエクスポートする DSC リソース
-    DscResourcesToExport = @('CPowerPlan', 'cPowerPlanSettings')
+    DscResourcesToExport = @('cPowerPlan', 'cPowerPlanSettings')
 
     # このモジュールからエクスポートされたコマンドの既定のプレフィックス。既定のプレフィックスをオーバーライドする場合は、Import-Module -Prefix を使用します。
     # DefaultCommandPrefix = ''
