@@ -36,10 +36,10 @@
     # CLRVersion = ''
 
     # RootModule/ModuleToProcess に指定されているモジュールの入れ子になったモジュールとしてインポートするモジュール
-    # NestedModules = @()
+    NestedModules = @('DSCResources\cPowerPlan\cPowerPlan.psm1', 'DSCResources\cPowerPlanSetting\cPowerPlanSetting.psm1')
 
     # このモジュールからエクスポートする関数です。最適なパフォーマンスを得るには、ワイルドカードを使用せず、エクスポートする関数がない場合は、エントリを削除しないで空の配列を使用してください。
-    FunctionsToExport    = @()
+    FunctionsToExport    = @('Get-PowerPlan', 'Get-PowerPlanSetting', 'Set-PowerPlanSetting')
 
     # このモジュールからエクスポートするコマンドレットです。最適なパフォーマンスを得るには、ワイルドカードを使用せず、エクスポートするコマンドレットがない場合は、エントリを削除しないで空の配列を使用してください。
     CmdletsToExport      = @()

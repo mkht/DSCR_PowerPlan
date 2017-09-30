@@ -345,4 +345,4 @@ function Disable-GroupPolicyPowerPlanSetting {
     Remove-item $RegKey -Recurse -Force | Out-Null
 }
 
-Export-ModuleMember -Function *-TargetResource
+Export-ModuleMember -Function ('Get-TargetResource', 'Test-TargetResource', 'Set-TargetResource', 'Get-PowerPlan', 'Get-PowerPlanSetting', 'Set-PowerPlanSetting')
