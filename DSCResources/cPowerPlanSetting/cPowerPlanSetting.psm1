@@ -4,9 +4,7 @@ $script:SettingListPath = Join-path $DataPath '\GUID_LIST_SETTING'
 $script:PowerPlanAliases = Get-Content $PlanListPath -Raw | ConvertFrom-StringData
 $script:PowerPlanSettingAliases = Get-Content $SettingListPath -Raw | ConvertFrom-StringData
 
-
-function Get-TargetResource
-{
+function Get-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param
@@ -24,7 +22,7 @@ function Get-TargetResource
         $Value,
 
         [parameter(Mandatory = $true)]
-        [ValidateSet("AC","DC","Both")]
+        [ValidateSet("AC", "DC", "Both")]
         [string]
         $AcDc = 'Both'
     )
@@ -35,19 +33,17 @@ function Get-TargetResource
 
     $returnValue = @{
         SettingGuid = $Setting.SettingGuid
-        PlanGuid = $Setting.PlanGuid
-        Value = $Value
-        ACValue = $Setting.ACValue
-        DCValue = $Setting.DCValue
+        PlanGuid    = $Setting.PlanGuid
+        Value       = $Value
+        ACValue     = $Setting.ACValue
+        DCValue     = $Setting.DCValue
     }
     Write-Verbose ("Current setting (AC: {0} | DC: {1})" -f $Setting.ACValue, $Setting.DCValue)
 
     $returnValue
 } # end of Get-TargetResource
 
-
-function Set-TargetResource
-{
+function Set-TargetResource {
     [CmdletBinding()]
     param
     (
@@ -64,25 +60,23 @@ function Set-TargetResource
         $Value,
 
         [parameter(Mandatory = $true)]
-        [ValidateSet("AC","DC","Both")]
+        [ValidateSet("AC", "DC", "Both")]
         [string]
         $AcDc = 'Both'
     )
     $ErrorActionPreference = 'Stop'
 
-    try{
+    try {
         Set-PowerPlanSetting @PSBoundParameters
         Write-Verbose "Power setting has been changed successfully. { PlanGuid: $PlanGuid | SettingGuid: $SettingGuid | Value: $Value | AcDc: $AcDc }"
     }
-    catch{
+    catch {
         Write-Error $_.Exception.Message
     }
 
 } # end of Set-TargetResource
 
-
-function Test-TargetResource
-{
+function Test-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
@@ -100,7 +94,7 @@ function Test-TargetResource
         $Value,
 
         [parameter(Mandatory = $true)]
-        [ValidateSet("AC","DC","Both")]
+        [ValidateSet("AC", "DC", "Both")]
         [string]
         $AcDc = 'Both'
     )
@@ -109,7 +103,7 @@ function Test-TargetResource
     $Current = $null
 
     Write-Verbose "Test started. { PlanGuid: $PlanGuid | SettingGuid: $SettingGuid | Value: $Value | AcDc: $AcDc }"
-    try{
+    try {
         $cState = (Get-TargetResource @PSBoundParameters)
         switch ($AcDc) {
             'AC' {
@@ -121,45 +115,44 @@ function Test-TargetResource
                 $Current = $cState.DCValue
             }
             Default {
-                if($cState.ACValue -ne $Value){
+                if ($cState.ACValue -ne $Value) {
                     $Result = $false
                     $Current = $cState.ACValue
                 }
-                elseif($cState.DCValue -ne $Value){
+                elseif ($cState.DCValue -ne $Value) {
                     $Result = $false
                     $Current = $cState.DCValue
                 }
-                else{
+                else {
                     $Result = $true
                     $Current = $cState.ACValue
                 }
             }
         }
     }
-    catch{
+    catch {
         Write-Error $_.Exception.Message
     }
 
-    if($Result){
+    if ($Result) {
         Write-Verbose ('[PASSED] Current: {0} / Desired : {1}' -f $Current, $Value)
     }
-    else{
+    else {
         Write-Verbose ('[FAILED] Current: {0} / Desired : {1}' -f $Current, $Value)
     }
 
     $Result
 } # end of Test-TargetResource
 
-
 function Get-PowerPlan {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0)]
+        [Parameter(Position = 0)]
         [AllowEmptyString()]
         [string]$GUID
     )
 
-    if($PowerPlanAliases.ContainsKey($GUID)){
+    if ($PowerPlanAliases.ContainsKey($GUID)) {
         $GUID = $PowerPlanAliases.$GUID
     }
 
@@ -169,7 +162,7 @@ function Get-PowerPlan {
     elseif ($GUID) {
         Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | Where-Object {$_.InstanceID -match $GUID}
     }
-    else{
+    else {
         Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | Where-Object {$_.IsActive}
     }
 }
@@ -197,17 +190,17 @@ function Get-PowerPlanSetting {
 
     Process {
         foreach ($planid in $PlanGuid) {
-            if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($planid)){
+            if ($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($planid)) {
                 $planid = $PowerPlanAliases.$planid
             }
-            if($PowerPlanSettingAliases -and $PowerPlanSettingAliases.ContainsKey($SettingGuid)){
+            if ($PowerPlanSettingAliases -and $PowerPlanSettingAliases.ContainsKey($SettingGuid)) {
                 $SettingGuid = $PowerPlanSettingAliases.$SettingGuid
             }
             $planid -replace '[{}]'
             $SettingGuid = $SettingGuid -replace '[{}]'
 
             $Plan = @(Get-PowerPlan $planid)[0]
-            if(-not $Plan){
+            if (-not $Plan) {
                 Write-Error "Couldn't get PowerPlan"
             }
 
@@ -216,15 +209,15 @@ function Get-PowerPlanSetting {
             $ReturnValue = @{
                 PlanGuid    = $planid
                 SettingGuid = $SettingGuid
-                ACValue = ''
-                DCValue =''
+                ACValue     = ''
+                DCValue     = ''
             }
 
-            foreach($Power in ('AC','DC')){
+            foreach ($Power in ('AC', 'DC')) {
                 $Key = ('{0}Value' -f $Power)
                 $InstanceId = ('Microsoft:PowerSettingDataIndex\{{{0}}}\{1}\{{{2}}}' -f $planid, $Power, $SettingGuid)
                 $Instance = (Get-CimInstance -Name root\cimv2\power -Class Win32_PowerSettingDataIndex | Where-Object {$_.InstanceID -eq $InstanceId})
-                if(-not $Instance){ Write-Error "Couldn't get power settings"; return }
+                if (-not $Instance) { Write-Error "Couldn't get power settings"; return }
                 $ReturnValue.$Key = [int]$Instance.SettingIndexValue
             }
 
@@ -233,7 +226,7 @@ function Get-PowerPlanSetting {
     }
 
     End {
-        if($GPReg){
+        if ($GPReg) {
             # 無効化した電源プラン系のグループポリシーを再設定する
             Restore-GroupPolicyPowerPlanSetting -GPRegArray $GPReg
         }
@@ -256,77 +249,77 @@ function Set-PowerPlanSetting {
         [int]
         $Value,
 
-        [ValidateSet("AC","DC","Both")]
+        [ValidateSet("AC", "DC", "Both")]
         [string]
         $AcDc = 'Both',
 
         [switch]$PassThru
     )
-    Begin{
-    $local:VerbosePreference = "SilentlyContinue"
-# 電源プラン系のグループポリシーが設定されていると電源設定の取得ができないので一時的に無効化する
-$GPReg = Backup-GroupPolicyPowerPlanSetting
-if ($GPReg) {
-    Disable-GroupPolicyPowerPlanSetting
-}
+    Begin {
+        $local:VerbosePreference = "SilentlyContinue"
+        # 電源プラン系のグループポリシーが設定されていると電源設定の取得ができないので一時的に無効化する
+        $GPReg = Backup-GroupPolicyPowerPlanSetting
+        if ($GPReg) {
+            Disable-GroupPolicyPowerPlanSetting
+        }
     }
-Process{
-    foreach ($planid in $PlanGuid) {
-    if ($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($planid)) {
-        $planid = $PowerPlanAliases.$planid
-    }
-    if($PowerPlanSettingAliases -and $PowerPlanSettingAliases.ContainsKey($SettingGuid)){
-        $SettingGuid = $PowerPlanSettingAliases.$SettingGuid
-    }
-    $planid = $planid -replace '[{}]'
-    $SettingGuid = $SettingGuid -replace '[{}]'
+    Process {
+        foreach ($planid in $PlanGuid) {
+            if ($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($planid)) {
+                $planid = $PowerPlanAliases.$planid
+            }
+            if ($PowerPlanSettingAliases -and $PowerPlanSettingAliases.ContainsKey($SettingGuid)) {
+                $SettingGuid = $PowerPlanSettingAliases.$SettingGuid
+            }
+            $planid = $planid -replace '[{}]'
+            $SettingGuid = $SettingGuid -replace '[{}]'
 
-    if($AcDc -eq 'Both'){
-        [string[]]$Target = ('AC', 'DC')
-    }
-    else{
-        [string[]]$Target = $AcDc
-    }
+            if ($AcDc -eq 'Both') {
+                [string[]]$Target = ('AC', 'DC')
+            }
+            else {
+                [string[]]$Target = $AcDc
+            }
 
-    $Plan = @(Get-PowerPlan $planid)[0]
-    if(-not $Plan){
-        Write-Error "Couldn't get PowerPlan"
-    }
+            $Plan = @(Get-PowerPlan $planid)[0]
+            if (-not $Plan) {
+                Write-Error "Couldn't get PowerPlan"
+            }
 
-    $planid = $Plan.InstanceId.Split('\')[1] -replace '[{}]'
+            $planid = $Plan.InstanceId.Split('\')[1] -replace '[{}]'
 
-    foreach($Power in $Target){
-        $Key = ('{0}Value' -f $Power)
-        $InstanceId = ('Microsoft:PowerSettingDataIndex\{{{0}}}\{1}\{{{2}}}' -f $planid, $Power, $SettingGuid)
-        $Instance = Get-CimInstance -Name root\cimv2\power -Class Win32_PowerSettingDataIndex | Where-Object {$_.InstanceID -eq $InstanceId}
-        if(-not $Instance){ Write-Error "Couldn't get power settings"; return }
-        $Instance | ForEach-Object {$_.SettingIndexValue = $Value}
-        Set-CimInstance -CimInstance $Instance
-    }
+            foreach ($Power in $Target) {
+                $Key = ('{0}Value' -f $Power)
+                $InstanceId = ('Microsoft:PowerSettingDataIndex\{{{0}}}\{1}\{{{2}}}' -f $planid, $Power, $SettingGuid)
+                $Instance = Get-CimInstance -Name root\cimv2\power -Class Win32_PowerSettingDataIndex | Where-Object {$_.InstanceID -eq $InstanceId}
+                if (-not $Instance) { Write-Error "Couldn't get power settings"; return }
+                $Instance | ForEach-Object {$_.SettingIndexValue = $Value}
+                Set-CimInstance -CimInstance $Instance
+            }
 
-    if($PassThru){
-        Get-PowerPlanSetting -PlanGuid $planid -SettingGuid $SettingGuid
+            if ($PassThru) {
+                Get-PowerPlanSetting -PlanGuid $planid -SettingGuid $SettingGuid
+            }
+        }
     }
-}
-}
-End{
-    if($GPReg){
-        # 無効化した電源プラン系のグループポリシーを再設定する
-        Restore-GroupPolicyPowerPlanSetting -GPRegArray $GPReg
+    End {
+        if ($GPReg) {
+            # 無効化した電源プラン系のグループポリシーを再設定する
+            Restore-GroupPolicyPowerPlanSetting -GPRegArray $GPReg
+        }
     }
-}
 }
 
 function Backup-GroupPolicyPowerPlanSetting {
     $RegKey = 'HKLM:\SOFTWARE\Policies\Microsoft\Power\PowerSettings'
-    if(Test-Path $RegKey){
+    if (Test-Path $RegKey) {
         $Array = @()
         Get-ChildItem $RegKey | ForEach-Object {
             $Path = $_.PSPath
-            foreach ($Prop in $_.Property){
-                    $Array += @{
-                    Path = $Path
-                    Name = $Prop
+            foreach ($Prop in $_.Property) {
+                $Array += @{
+                    Path  = $Path
+                    Name  = $Prop
                     Value = Get-ItemPropertyValue -Path $Path -Name $Prop
                 }
             }
@@ -340,8 +333,8 @@ function Restore-GroupPolicyPowerPlanSetting {
         [HashTable[]]$GPRegArray
     )
 
-    foreach($Item in $GPRegArray){
-        if(-not (Test-Path $Item.Path)){
+    foreach ($Item in $GPRegArray) {
+        if (-not (Test-Path $Item.Path)) {
             New-Item -Path $Item.Path -ItemType Directory -Force | Out-Null
         }
         New-ItemProperty @Item -Force | Out-Null
