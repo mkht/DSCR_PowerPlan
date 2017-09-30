@@ -289,7 +289,6 @@ function Set-PowerPlanSetting {
             $planid = $Plan.InstanceId.Split('\')[1] -replace '[{}]'
 
             foreach ($Power in $Target) {
-                $Key = ('{0}Value' -f $Power)
                 $InstanceId = ('Microsoft:PowerSettingDataIndex\{{{0}}}\{1}\{{{2}}}' -f $planid, $Power, $SettingGuid)
                 $Instance = Get-CimInstance -Name root\cimv2\power -Class Win32_PowerSettingDataIndex | Where-Object {$_.InstanceID -eq $InstanceId}
                 if (-not $Instance) { Write-Error "Couldn't get power settings"; return }
