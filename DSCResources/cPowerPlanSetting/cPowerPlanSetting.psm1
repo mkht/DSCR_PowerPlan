@@ -147,7 +147,8 @@ function Test-TargetResource {
 function Get-PowerPlan {
     [CmdletBinding()]
     Param(
-        [Parameter(Position = 0)]
+        [Parameter(Position = 0, ValueFromPipeline)]
+        [Alias('PlanGuid')]
         [AllowEmptyString()]
         [string]$GUID
     )

@@ -245,24 +245,27 @@ function Test-TargetResource
     $Result
 } # end of Test-TargetResource
 
-
 function Get-PowerPlan {
     [CmdletBinding()]
     Param(
-        [Parameter(Position=0)]
+        [Parameter(Position = 0, ValueFromPipeline)]
+        [Alias('PlanGuid')]
         [AllowEmptyString()]
         [string]$GUID
     )
 
-    if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)){
+    if ($PowerPlanAliases.ContainsKey($GUID)) {
         $GUID = $PowerPlanAliases.$GUID
     }
 
-    if($GUID){
-        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | where {$_.InstanceID -match $GUID}
+    if ($GUID -eq 'ALL') {
+        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan
     }
-    else{
-        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | where {$_.IsActive}
+    elseif ($GUID) {
+        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | Where-Object {$_.InstanceID -match $GUID}
+    }
+    else {
+        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | Where-Object {$_.IsActive}
     }
 }
 
