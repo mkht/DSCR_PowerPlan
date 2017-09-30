@@ -163,7 +163,10 @@ function Get-PowerPlan {
         $GUID = $PowerPlanAliases.$GUID
     }
 
-    if($GUID){
+    if ($GUID -eq 'ALL') {
+        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan
+    }
+    elseif ($GUID) {
         Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | Where-Object {$_.InstanceID -match $GUID}
     }
     else{
@@ -175,7 +178,8 @@ function Get-PowerPlanSetting {
     [CmdletBinding()]
     param
     (
-        [string]
+        [parameter(Mandatory = $false, ValueFromPipeline)]
+        [string[]]
         $PlanGuid,
 
         [parameter(Mandatory = $true)]
@@ -183,56 +187,65 @@ function Get-PowerPlanSetting {
         $SettingGuid
     )
 
-    if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($PlanGuid)){
-        $PlanGuid = $PowerPlanAliases.$PlanGuid
-    }
-    if($PowerPlanSettingAliases -and $PowerPlanSettingAliases.ContainsKey($SettingGuid)){
-        $SettingGuid = $PowerPlanSettingAliases.$SettingGuid
-    }
-    $PlanGuid = $PlanGuid -replace '[{}]'
-    $SettingGuid = $SettingGuid -replace '[{}]'
-
-    $Plan = @(Get-PowerPlan $PlanGuid)[0]
-    if(-not $Plan){
-        Write-Error "Couldn't get PowerPlan"
+    Begin {
+        # 電源プラン系のグループポリシーが設定されていると電源設定の取得ができないので一時的に無効化する
+        $GPReg = Backup-GroupPolicyPowerPlanSetting
+        if ($GPReg) {
+            Disable-GroupPolicyPowerPlanSetting
+        }
     }
 
-    $PlanGuid = $Plan.InstanceId.Split('\')[1] -replace '[{}]'
+    Process {
+        foreach ($planid in $PlanGuid) {
+            if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($planid)){
+                $planid = $PowerPlanAliases.$planid
+            }
+            if($PowerPlanSettingAliases -and $PowerPlanSettingAliases.ContainsKey($SettingGuid)){
+                $SettingGuid = $PowerPlanSettingAliases.$SettingGuid
+            }
+            $planid -replace '[{}]'
+            $SettingGuid = $SettingGuid -replace '[{}]'
 
-    $ReturnValue = @{
-        PlanGuid = $PlanGuid
-        SettingGuid = $SettingGuid
-        ACValue = ''
-        DCValue =''
+            $Plan = @(Get-PowerPlan $planid)[0]
+            if(-not $Plan){
+                Write-Error "Couldn't get PowerPlan"
+            }
+
+            $planid = $Plan.InstanceId.Split('\')[1] -replace '[{}]'
+
+            $ReturnValue = @{
+                PlanGuid    = $planid
+                SettingGuid = $SettingGuid
+                ACValue = ''
+                DCValue =''
+            }
+
+            foreach($Power in ('AC','DC')){
+                $Key = ('{0}Value' -f $Power)
+                $InstanceId = ('Microsoft:PowerSettingDataIndex\{{{0}}}\{1}\{{{2}}}' -f $planid, $Power, $SettingGuid)
+                $Instance = (Get-CimInstance -Name root\cimv2\power -Class Win32_PowerSettingDataIndex | Where-Object {$_.InstanceID -eq $InstanceId})
+                if(-not $Instance){ Write-Error "Couldn't get power settings"; return }
+                $ReturnValue.$Key = [int]$Instance.SettingIndexValue
+            }
+
+            $ReturnValue
+        }
     }
 
-    # 電源プラン系のグループポリシーが設定されていると電源設定の取得ができないので一時的に無効化する
-    $GPReg = Backup-GroupPolicyPowerPlanSetting
-    if($GPReg){
-        Disable-GroupPolicyPowerPlanSetting
+    End {
+        if($GPReg){
+            # 無効化した電源プラン系のグループポリシーを再設定する
+            Restore-GroupPolicyPowerPlanSetting -GPRegArray $GPReg
+        }
     }
-
-    foreach($Power in ('AC','DC')){
-        $Key = ('{0}Value' -f $Power)
-        $InstanceId = ('Microsoft:PowerSettingDataIndex\{{{0}}}\{1}\{{{2}}}' -f $PlanGuid, $Power, $SettingGuid)
-        $Instance = (Get-CimInstance -Name root\cimv2\power -Class Win32_PowerSettingDataIndex | Where-Object {$_.InstanceID -eq $InstanceId})
-        if(-not $Instance){ Write-Error "Couldn't get power settings"; return }
-        $ReturnValue.$Key = [int]$Instance.SettingIndexValue
-    }
-
-    if($GPReg){
-        # 無効化した電源プラン系のグループポリシーを再設定する
-        Restore-GroupPolicyPowerPlanSetting -GPRegArray $GPReg
-    }
-
-    $ReturnValue
 }
 
 function Set-PowerPlanSetting {
     [CmdletBinding()]
     param
     (
-        [string]
+        [parameter(Mandatory = $false, ValueFromPipeline)]
+        [string[]]
         $PlanGuid,
 
         [parameter(Mandatory = $true)]
@@ -249,16 +262,23 @@ function Set-PowerPlanSetting {
 
         [switch]$PassThru
     )
-
+    Begin{
     $local:VerbosePreference = "SilentlyContinue"
-
-    if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($PlanGuid)){
-        $PlanGuid = $PowerPlanAliases.$PlanGuid
+# 電源プラン系のグループポリシーが設定されていると電源設定の取得ができないので一時的に無効化する
+$GPReg = Backup-GroupPolicyPowerPlanSetting
+if ($GPReg) {
+    Disable-GroupPolicyPowerPlanSetting
+}
+    }
+Process{
+    foreach ($planid in $PlanGuid) {
+    if ($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($planid)) {
+        $planid = $PowerPlanAliases.$planid
     }
     if($PowerPlanSettingAliases -and $PowerPlanSettingAliases.ContainsKey($SettingGuid)){
         $SettingGuid = $PowerPlanSettingAliases.$SettingGuid
     }
-    $PlanGuid = $PlanGuid -replace '[{}]'
+    $planid = $planid -replace '[{}]'
     $SettingGuid = $SettingGuid -replace '[{}]'
 
     if($AcDc -eq 'Both'){
@@ -268,22 +288,16 @@ function Set-PowerPlanSetting {
         [string[]]$Target = $AcDc
     }
 
-    $Plan = @(Get-PowerPlan $PlanGuid)[0]
+    $Plan = @(Get-PowerPlan $planid)[0]
     if(-not $Plan){
         Write-Error "Couldn't get PowerPlan"
     }
 
-    $PlanGuid = $Plan.InstanceId.Split('\')[1] -replace '[{}]'
-
-    # 電源プラン系のグループポリシーが設定されていると電源設定の取得ができないので一時的に無効化する
-    $GPReg = Backup-GroupPolicyPowerPlanSetting
-    if($GPReg){
-        Disable-GroupPolicyPowerPlanSetting
-    }
+    $planid = $Plan.InstanceId.Split('\')[1] -replace '[{}]'
 
     foreach($Power in $Target){
         $Key = ('{0}Value' -f $Power)
-        $InstanceId = ('Microsoft:PowerSettingDataIndex\{{{0}}}\{1}\{{{2}}}' -f $PlanGuid, $Power, $SettingGuid)
+        $InstanceId = ('Microsoft:PowerSettingDataIndex\{{{0}}}\{1}\{{{2}}}' -f $planid, $Power, $SettingGuid)
         $Instance = Get-CimInstance -Name root\cimv2\power -Class Win32_PowerSettingDataIndex | Where-Object {$_.InstanceID -eq $InstanceId}
         if(-not $Instance){ Write-Error "Couldn't get power settings"; return }
         $Instance | ForEach-Object {$_.SettingIndexValue = $Value}
@@ -291,13 +305,16 @@ function Set-PowerPlanSetting {
     }
 
     if($PassThru){
-        Get-PowerPlanSetting -PlanGuid $PlanGuid -SettingGuid $SettingGuid
+        Get-PowerPlanSetting -PlanGuid $planid -SettingGuid $SettingGuid
     }
-
+}
+}
+End{
     if($GPReg){
         # 無効化した電源プラン系のグループポリシーを再設定する
         Restore-GroupPolicyPowerPlanSetting -GPRegArray $GPReg
     }
+}
 }
 
 function Backup-GroupPolicyPowerPlanSetting {
