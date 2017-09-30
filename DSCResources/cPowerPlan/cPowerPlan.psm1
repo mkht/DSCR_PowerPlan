@@ -2,13 +2,12 @@
 $script:PlanListPath = Join-path $DataPath '\GUID_LIST_PLAN'
 $script:PowerPlanAliases = Get-Content $PlanListPath -Raw | ConvertFrom-StringData
 
-function Get-TargetResource
-{
+function Get-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
     param
     (
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [string]
         $Ensure = 'Present',
 
@@ -30,18 +29,18 @@ function Get-TargetResource
     $ErrorActionPreference = 'Stop'
 
     Write-Verbose "Retrieving Power Plan. { GUID: $GUID }"
-    if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)){
+    if ($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)) {
         $GUID = $PowerPlanAliases.$GUID
     }
 
     $Plan = @(Get-PowerPlan -GUID $GUID -Verbose:$false)[0]
-    if(-not $Plan){
+    if (-not $Plan) {
         $Ensure = 'Absent'
         $Name = ''
         $Description = ''
         $Active = $false
     }
-    else{
+    else {
         $Ensure = 'Present'
         $Name = $Plan.ElementName
         $Description = $Plan.Description
@@ -56,17 +55,15 @@ function Get-TargetResource
         Active      = [bool]$Active
     }
 
-    Write-Verbose ("Current state ( Ensure: {0} | GUID: {1} | Name: {2} | Description: {3} | Active: {4} )" -f $returnValue.Ensure,$returnValue.GUID,$returnValue.Name,$returnValue.Description,$returnValue.Active)
+    Write-Verbose ("Current state ( Ensure: {0} | GUID: {1} | Name: {2} | Description: {3} | Active: {4} )" -f $returnValue.Ensure, $returnValue.GUID, $returnValue.Name, $returnValue.Description, $returnValue.Active)
     $returnValue
 } # end of Get-TargetResource
 
-
-function Set-TargetResource
-{
+function Set-TargetResource {
     [CmdletBinding()]
     param
     (
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [string]
         $Ensure = 'Present',
 
@@ -87,89 +84,89 @@ function Set-TargetResource
     )
     $ErrorActionPreference = 'Stop'
 
-    if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)){
+    if ($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)) {
         $GUID = $PowerPlanAliases.$GUID
     }
 
-    try{
+    try {
         # Ensure = "Absent"
-        if($Ensure -eq 'Absent'){
+        if ($Ensure -eq 'Absent') {
             $Plan = Get-PowerPlan $GUID -Verbose:$false
             $PlanGUID = $Plan.InstanceId.Split('\')[1] -replace '[{}]'
             Write-Verbose ('Removing PowerPlan ({0})' -f $PlanGUID)
-            if($Plan.IsActive){
+            if ($Plan.IsActive) {
                 $NonActivePlan = Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan -Verbose:$false | where {-not $_.IsActive} | select -First 1
-                if(-not $NonActivePlan){
+                if (-not $NonActivePlan) {
                     Write-Error "Couldn't deactivate the powerplan"
                 }
                 $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/SETACTIVE {0}' -f ($NonActivePlan.InstanceId.Split('\')[1] -replace '[{}]'))).ExitCode
-                if($ExitCode -ne 0){
+                if ($ExitCode -ne 0) {
                     Write-Error "Couldn't deactivate the powerplan"
                 }
             }
             $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/D {0}' -f $PlanGUID)).ExitCode
-            if($ExitCode -ne 0){
+            if ($ExitCode -ne 0) {
                 Write-Error 'Error occured'
             }
-            else{
+            else {
                 Write-Verbose 'Power Plan removed successfully'
             }
         }
-        else{
+        else {
             # Ensure = "Present"
-            if($Plan = Get-PowerPlan $GUID -Verbose:$false){
+            if ($Plan = Get-PowerPlan $GUID -Verbose:$false) {
                 $PlanGUID = $Plan.InstanceId.Split('\')[1] -replace '[{}]'
-                if($Plan.ElementName -ne $Name){
-                    if($PSBoundParameters.ContainsKey('Description')){
+                if ($Plan.ElementName -ne $Name) {
+                    if ($PSBoundParameters.ContainsKey('Description')) {
                         $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/CHANGENAME {0} "{1}" "{2}"' -f $PlanGUID, $Name, $Description)).ExitCode
                     }
-                    else{
+                    else {
                         $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/CHANGENAME {0} "{1}"' -f $PlanGUID, $Name)).ExitCode
                     }
-                    if($ExitCode -ne 0){
+                    if ($ExitCode -ne 0) {
                         Write-Error 'Error occured when changing the name of Power Plan'
                     }
                     Write-Verbose 'The Name of Power Plan has been changed successfully.'
                 }
 
-                if($Active){
+                if ($Active) {
                     $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/SETACTIVE {0}' -f $PlanGUID)).ExitCode
-                    if($ExitCode -ne 0){
+                    if ($ExitCode -ne 0) {
                         Write-Error "Couldn't activate the powerplan"
                     }
                     Write-Verbose 'The Power Plan activated.'
                 }
-                elseif($Plan.IsActive){
+                elseif ($Plan.IsActive) {
                     $NonActivePlan = Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan -Verbose:$false | where {-not $_.IsActive} | select -First 1
-                    if(-not $NonActivePlan){
+                    if (-not $NonActivePlan) {
                         Write-Error "Couldn't deactivate the powerplan"
                     }
                     $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/SETACTIVE {0}' -f ($NonActivePlan.InstanceId.Split('\')[1] -replace '[{}]'))).ExitCode
-                    if($ExitCode -ne 0){
+                    if ($ExitCode -ne 0) {
                         Write-Error "Couldn't deactivate the powerplan"
                     }
                     Write-Verbose 'The Power Plan deactivated.'
                 }
             }
-            else{
-                if($GUID -notmatch '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'){
+            else {
+                if ($GUID -notmatch '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$') {
                     Write-Error 'Invalid GUID format'
                 }
                 $BasePlan = Get-PowerPlan -Verbose:$false
                 $BaseGuid = $BasePlan.InstanceId.Split('\')[1] -replace '[{}]'
                 $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/DUPLICATESCHEME {0} {1}' -f $BaseGuid, $GUID)).ExitCode
-                if($ExitCode -ne 0){
+                if ($ExitCode -ne 0) {
                     Write-Error "Couldn't create the Power Plan"
                 }
 
                 $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/CHANGENAME {0} "{1}" "{2}"' -f $GUID, $Name, $Description)).ExitCode
-                if($ExitCode -ne 0){
+                if ($ExitCode -ne 0) {
                     Write-Error 'Error occured when changing the name of Power Plan'
                 }
 
-                if($Active){
+                if ($Active) {
                     $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/SETACTIVE {0}' -f $GUID)).ExitCode
-                    if($ExitCode -ne 0){
+                    if ($ExitCode -ne 0) {
                         Write-Error "Couldn't activate the Power Plan"
                     }
                 }
@@ -178,20 +175,18 @@ function Set-TargetResource
             }
         }
     }
-    catch{
+    catch {
         Write-Error $_.Exception.Message
     }
 
 } # end of Set-TargetResource
 
-
-function Test-TargetResource
-{
+function Test-TargetResource {
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
     (
-        [ValidateSet("Present","Absent")]
+        [ValidateSet("Present", "Absent")]
         [string]
         $Ensure = 'Present',
 
@@ -212,12 +207,12 @@ function Test-TargetResource
     )
 
     Write-Verbose "Test started. { Ensure: $Ensure | GUID: $GUID | Name: $Name | Description: $Description | Active: $Active }"
-    if($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)){
+    if ($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)) {
         $GUID = $PowerPlanAliases.$GUID
     }
 
     $Result = $false
-    try{
+    try {
         $cState = (Get-TargetResource @PSBoundParameters)
         if ($Ensure -ne $cState.Ensure) {
             $Result = $false
@@ -232,14 +227,14 @@ function Test-TargetResource
             $Result = $true
         }
     }
-    catch{
+    catch {
         Write-Error $_.Exception.Message
     }
 
-    if($Result){
+    if ($Result) {
         Write-Verbose ('Test Passed')
     }
-    else{
+    else {
         Write-Verbose ('Test Failed')
     }
     $Result
@@ -272,9 +267,9 @@ function Get-PowerPlan {
 function Start-Command {
     [CmdletBinding()]
     Param(
-        [Parameter(Mandatory=$true, Position=0)]
+        [Parameter(Mandatory = $true, Position = 0)]
         [string] $FilePath,
-        [Parameter(Mandatory=$false, Position=1)]
+        [Parameter(Mandatory = $false, Position = 1)]
         [string[]]$ArgumentList,
         [int]$Timeout = [int]::MaxValue
     )
@@ -285,7 +280,7 @@ function Start-Command {
     $Process = New-Object System.Diagnostics.Process
     $Process.StartInfo = $ProcessInfo
     $Process.Start() | Out-Null
-    if(!$Process.WaitForExit($Timeout)){
+    if (!$Process.WaitForExit($Timeout)) {
         $Process.Kill()
         Write-Error ('Process timeout. Terminated. (Timeout:{0}s, Process:{1})' -f ($Timeout * 0.001), $FilePath)
     }
