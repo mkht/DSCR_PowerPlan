@@ -21,16 +21,24 @@ Configuration PowerPlan_Sample
             Description = "This is Customized"
         }
 
-        cPowerPlanSetting PowerPlanSetting_Sample
+        cPowerPlanSetting PowerPlanSetting_Sample1
         {
             PlanGuid = 'ACTIVE'
             SettingGuid = 'PBUTTONACTION'
             Value = 2   #Hibernate
             AcDc = 'AC'
         }
+
+        cPowerPlanSetting PowerPlanSetting_Sample2
+        {
+            PlanGuid = 'ALL'    #Targeted all powerplan
+            SettingGuid = 'LIDACTION'
+            Value = 1   #sleep
+            AcDc = 'Both'
+        }
     }
 }
 
 PowerPlan_Sample -OutputPath $output
 Start-DscConfiguration -Path  $output -Verbose -wait
-
+Remove-DscConfigurationDocument -stage Current,Previous,Pending -Force
