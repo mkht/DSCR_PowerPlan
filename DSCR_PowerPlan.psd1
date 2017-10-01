@@ -12,7 +12,7 @@
     # RootModule = ''
 
     # このモジュールのバージョン番号です。
-    ModuleVersion        = '1.0.0'
+    ModuleVersion        = '1.1.0'
 
     # このモジュールを一意に識別するために使用される ID
     GUID                 = '8086f837-5c44-46fc-ac64-b55ac83d9e37'
@@ -36,7 +36,7 @@
     # CLRVersion = ''
 
     # RootModule/ModuleToProcess に指定されているモジュールの入れ子になったモジュールとしてインポートするモジュール
-    NestedModules = @('DSCResources\cPowerPlan\cPowerPlan.psm1', 'DSCResources\cPowerPlanSetting\cPowerPlanSetting.psm1')
+    NestedModules        = @('DSCResources\cPowerPlan\cPowerPlan.psm1', 'DSCResources\cPowerPlanSetting\cPowerPlanSetting.psm1')
 
     # このモジュールからエクスポートする関数です。最適なパフォーマンスを得るには、ワイルドカードを使用せず、エクスポートする関数がない場合は、エントリを削除しないで空の配列を使用してください。
     FunctionsToExport    = @('Get-PowerPlan', 'Get-PowerPlanSetting', 'Set-PowerPlanSetting')
@@ -62,7 +62,7 @@
         PSData = @{
 
             # このモジュールに適用されているタグ。オンライン ギャラリーでモジュールを検出する際に役立ちます。
-            Tags       = ('DesiredStateConfiguration', 'DSC', 'DSCResource', 'PowerPlan')
+            Tags       = ('DSC', 'DSCResource', 'PowerPlan', 'PowerScheme')
 
             # A URL to the license for this module.
             LicenseUri = 'https://github.com/mkht/DSCR_PowerPlan/blob/master/LICENSE'
