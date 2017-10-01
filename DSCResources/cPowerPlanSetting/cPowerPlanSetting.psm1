@@ -197,7 +197,7 @@ function Get-PowerPlanSetting {
             if ($PowerPlanSettingAliases -and $PowerPlanSettingAliases.ContainsKey($SettingGuid)) {
                 $SettingGuid = $PowerPlanSettingAliases.$SettingGuid
             }
-            $planid -replace '[{}]'
+            $planid = $planid -replace '[{}]'
             $SettingGuid = $SettingGuid -replace '[{}]'
 
             $Plan = @(Get-PowerPlan $planid)[0]
