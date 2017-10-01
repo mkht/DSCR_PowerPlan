@@ -1,7 +1,7 @@
 DSCR_PowerPlan
 ====
 
-PowerShell DSC Resource for Power Plan configuration
+PowerShell DSC Resource & Functions for Power Plan configuration
 
 ## Install
 You can install Resource through [PowerShell Gallery](https://www.powershellgallery.com/packages/DSCR_PowerPlan/).
@@ -9,7 +9,7 @@ You can install Resource through [PowerShell Gallery](https://www.powershellgall
 Install-Module -Name DSCR_PowerPlan
 ```
 
-## Resources
+## DSC Resources
 * **cPowerPlan**
 PowerShell DSC Resource for create/change/remove Power Plan.
 
@@ -21,7 +21,7 @@ PowerShell DSC Resource for change Power settings & options.
 ### cPowerPlan
 + [String] **Ensure** (Write):
     + Specifies existence state of Power Plan.
-    + The default value is "Present". { Present | Absent }
+    + The default value is `Present`. { `Present` | `Absent` }
 
 + [String] **Name** (Required):
     + The Name of Power Plan.
@@ -32,7 +32,7 @@ PowerShell DSC Resource for change Power settings & options.
 + [String] **GUID** (Key):
     + The GUID of Power Plan.
     + If you want to create Original Plan, should specify unique GUID.
-    + If you want to set system default Plans, you can use aliases. {SCHEME_MAX | SCHEME_MIN | SCHEME_BALANCED}
+    + If you want to set system default Plans, you can use aliases. {`SCHEME_MAX` | `SCHEME_MIN` | `SCHEME_BALANCED`}
 
 + [Boolean] **Active** (Write):
     + Specifies set or unset Power Plan as Active.
@@ -46,11 +46,12 @@ PowerShell DSC Resource for change Power settings & options.
 
 + [String] **PlanGuid** (Key):
     + The GUID of target Power Plan.
-    + You can also use aliases. {ACTIVE | SCHEME_MAX | SCHEME_MIN | SCHEME_BALANCED}
+    + You can also use aliases. {`ACTIVE` | `ALL` | `SCHEME_MAX` | `SCHEME_MIN` | `SCHEME_BALANCED`}
+    + If you specify the aliase `ALL`, All Power Plans on the current system to be targeted.
 
 + [String] **AcDc** (Key):
-    + You can choose {AC | DC | Both}
-    + The default value is "Both"
+    + You can choose {`AC` | `DC` | `Both`}
+    + The default value is `Both`
 
 + [UInt32] **Value** (Required):
     + Specifies Power Setting value.
@@ -103,8 +104,45 @@ Configuration Example1
     }
 }
 ```
+----
+## Functions
+You can use some functions to set Power Plan
+### Get-PowerPlan
+Get Power Plans on the current system.
+```PowerShell
+PS C:\> Get-PowerPlan -GUID 'ACTIVE'
+Caption        :
+Description    : Automatically balances performance with...
+ElementName    : Balanced
+InstanceID     : Microsoft:PowerPlan\{381b4222-f694-41f0-9685-ff5bb260df2e}
+IsActive       : True
+PSComputerName :
+```
+### Get-PowerPlanSetting
+Get specified settings of Power Plan.
+```PowerShell
+PS C:\> Get-PowerPlanSetting -PlanGuid 'ACTIVE' -SettingGuid 'PBUTTONACTION'
+Name                           Value
+----                           -----
+SettingGuid                    7648efa3-dd9c-4e3e-b566-50f929386280
+DCValue                        3
+ACValue                        3
+PlanGuid                       381b4222-f694-41f0-9685-ff5bb260df2e
+```
 
+### Set-PowerPlanSetting
+Set specified settings of Power Plan.
+```PowerShell
+PS C:\> Set-PowerPlanSetting -PlanGuid 'ACTIVE' -SettingGuid 'LIDACTION' -Value 1 -AcDc 'Both'
+```
+----
 ## ChangeLog
+### 1.1.0
++ Support to set all power plans at once in `cPowerPlanSetting` (see [sample](Sample/))
++ Support hidden aliases in `cPowerPlanSetting`
++ Support new aliases in Windows 10 Fall Creators Update
++ Several useful functions are now available (`Get-PowerPlan`, `Get-PowerPlanSetting`, `Set-PowerPlanSetting`)
+
 ### 1.0.0
 + Add "Description" property for cPowerPLan
 + bug fix
