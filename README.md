@@ -137,6 +137,9 @@ PS C:\> Set-PowerPlanSetting -PlanGuid 'ACTIVE' -SettingGuid 'LIDACTION' -Value 
 ```
 ----
 ## ChangeLog
+### 1.1.1
++ bug fix [#6](https://github.com/mkht/DSCR_PowerPlan/issues/6)
+
 ### 1.1.0
 + Support to set all power plans at once in `cPowerPlanSetting` (see [sample](Sample/))
 + Support hidden aliases in `cPowerPlanSetting`
