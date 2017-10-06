@@ -106,13 +106,14 @@ function Test-TargetResource {
     $Result = $true
 
     Write-Verbose "Test started. { PlanGuid: $PlanGuid | SettingGuid: $SettingGuid | Value: $Value | AcDc: $AcDc }"
-    if ($AcDc -eq 'Both') { $AcDc = 'ACDC'}
+    if ($AcDc -eq 'Both') { $Mode = 'ACDC'}
+    else { $Mode = $AcDc }
 
     try {
         $Settings = Get-PowerPlanSetting -PlanGuid $PlanGuid -SettingGuid $SettingGuid -Verbose:$false
         #SCHEME_ALLの場合全てのPowerPlanの設定値をチェックする必要がある
         foreach ($cState in $Settings) {
-            switch -RegEx ($AcDc) {
+            switch -RegEx ($Mode) {
                 'AC' {
                     if ($cState.ACValue -ne $Value) {
                         $Result = $false
