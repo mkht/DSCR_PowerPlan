@@ -12,7 +12,7 @@
     # RootModule = ''
 
     # このモジュールのバージョン番号です。
-    ModuleVersion        = '1.1.1'
+    ModuleVersion        = '1.2.0'
 
     # このモジュールを一意に識別するために使用される ID
     GUID                 = '8086f837-5c44-46fc-ac64-b55ac83d9e37'
@@ -24,7 +24,7 @@
     CompanyName          = ''
 
     # このモジュールの著作権情報
-    Copyright            = '(c) 2017 mkht. All rights reserved.'
+    Copyright            = '(c) 2018 mkht. All rights reserved.'
 
     # このモジュールの機能の説明
     Description          = 'PowerShell DSC Resource for Power Plan configuration'

@@ -11,10 +11,10 @@ Install-Module -Name DSCR_PowerPlan
 
 ## DSC Resources
 * **cPowerPlan**
-PowerShell DSC Resource for create/change/remove Power Plan.
+PowerShell DSC Resource for create / change / remove Power Plan.
 
 * **cPowerPlanSettings**
-PowerShell DSC Resource for change Power settings & options.
+PowerShell DSC Resource for modify Power settings & options.
 
 ## Properties
 
@@ -137,6 +137,9 @@ PS C:\> Set-PowerPlanSetting -PlanGuid 'ACTIVE' -SettingGuid 'LIDACTION' -Value 
 ```
 ----
 ## ChangeLog
+### 1.2.0
++ Support new aliases in Windows 10 version 1803
+
 ### 1.1.1
 + bug fix [#6](https://github.com/mkht/DSCR_PowerPlan/issues/6)
 
