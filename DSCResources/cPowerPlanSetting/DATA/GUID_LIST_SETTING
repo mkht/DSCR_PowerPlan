@@ -5,6 +5,8 @@
 BATACTIONCRIT             = 637ea02f-bbcb-4015-8e2c-a1c7b9c0b546
 #Low Battery action
 BATACTIONLOW              = d8742dcb-3e6a-4b3c-b3fe-374623cdcf06
+#Critical battery warning
+BATFLAGSCRIT              = 5dbb7c9f-38e9-40d2-9749-4f8a0e9f640f
 #Low battery warning
 BATFLAGSLOW               = bcded951-187b-4d05-bccc-f7e51960c258
 #Critical battery threshold
@@ -237,3 +239,5 @@ VIDEOIDLE                 = 3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e
 VIDEONORMALLEVEL          = aded5e82-b909-4619-9949-f5d71dac0bcb
 #Dim display brightness
 VIDEODIMLEVEL             = f1fbfde2-a960-4165-9f88-50667911ce96
+#GPU preference policy
+GPUPREFERENCEPOLICY       = dd848b2a-8a5d-4451-9ae2-39cd41658f6c
