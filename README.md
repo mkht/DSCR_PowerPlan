@@ -144,7 +144,7 @@ PS C:\> Set-PowerPlanSetting -PlanGuid 'ACTIVE' -SettingGuid 'LIDACTION' -Value 
 + bug fix [#6](https://github.com/mkht/DSCR_PowerPlan/issues/6)
 
 ### 1.1.0
-+ Support to set all power plans at once in `cPowerPlanSetting` (see [sample](Sample/))
++ Support to set all power plans at once in `cPowerPlanSetting` (see [example](Example/))
 + Support hidden aliases in `cPowerPlanSetting`
 + Support new aliases in Windows 10 Fall Creators Update
 + Several useful functions are now available (`Get-PowerPlan`, `Get-PowerPlanSetting`, `Set-PowerPlanSetting`)
