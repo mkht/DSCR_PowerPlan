@@ -137,6 +137,11 @@ PS C:\> Set-PowerPlanSetting -PlanGuid 'ACTIVE' -SettingGuid 'LIDACTION' -Value 
 ```
 ----
 ## ChangeLog
+### 1.3.0
++ Support new aliases in Windows 10 version 1809 (`PERFEPP1` / `ADVANCEDCOLORQUALITYBIAS`)
++ Add `-All` switch in `Get-PowerPlan`
++ Minor fixes
+
 ### 1.2.0
 + Support new aliases in Windows 10 version 1803
 
