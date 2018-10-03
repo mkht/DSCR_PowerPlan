@@ -1,0 +1,8 @@
+{
+    "editor.trimAutoWhitespace": true,
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "[markdown]": {
+        "files.trimTrailingWhitespace": false
+    }
+}
