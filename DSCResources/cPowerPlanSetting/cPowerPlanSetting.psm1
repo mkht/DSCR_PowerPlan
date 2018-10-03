@@ -1,8 +1,8 @@
-$script:DataPath = Join-path $PSScriptRoot '\DATA'
-$script:PlanListPath = Join-path $DataPath '\GUID_LIST_PLAN'
-$script:SettingListPath = Join-path $DataPath '\GUID_LIST_SETTING'
-$script:PowerPlanAliases = Get-Content $PlanListPath -Raw | ConvertFrom-StringData
-$script:PowerPlanSettingAliases = Get-Content $SettingListPath -Raw | ConvertFrom-StringData
+﻿$script:DataPath = Join-path $PSScriptRoot '\DATA'
+$script:PlanListPath = Join-path $script:DataPath '\GUID_LIST_PLAN'
+$script:SettingListPath = Join-path $script:DataPath '\GUID_LIST_SETTING'
+$script:PowerPlanAliases = Get-Content $script:PlanListPath -Raw | ConvertFrom-StringData
+$script:PowerPlanSettingAliases = Get-Content $script:SettingListPath -Raw | ConvertFrom-StringData
 
 function Get-TargetResource {
     [CmdletBinding()]
@@ -162,8 +162,8 @@ function Get-PowerPlan {
         [switch]$All
     )
 
-    if ($PowerPlanAliases.ContainsKey($GUID)) {
-        $GUID = $PowerPlanAliases.$GUID
+    if ($script:PowerPlanAliases.ContainsKey($GUID)) {
+        $GUID = $script:PowerPlanAliases.$GUID
     }
 
     if (($All -eq $true) -or ($GUID -eq 'ALL')) {
@@ -200,11 +200,11 @@ function Get-PowerPlanSetting {
 
     Process {
         foreach ($planid in $PlanGuid) {
-            if ($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($planid)) {
-                $planid = $PowerPlanAliases.$planid
+            if ($script:PowerPlanAliases -and $script:PowerPlanAliases.ContainsKey($planid)) {
+                $planid = $script:PowerPlanAliases.$planid
             }
-            if ($PowerPlanSettingAliases -and $PowerPlanSettingAliases.ContainsKey($SettingGuid)) {
-                $SettingGuid = $PowerPlanSettingAliases.$SettingGuid
+            if ($script:PowerPlanSettingAliases -and $script:PowerPlanSettingAliases.ContainsKey($SettingGuid)) {
+                $SettingGuid = $script:PowerPlanSettingAliases.$SettingGuid
             }
             $planid = $planid -replace '[{}]'
             $SettingGuid = $SettingGuid -replace '[{}]'
@@ -276,11 +276,11 @@ function Set-PowerPlanSetting {
     }
     Process {
         foreach ($planid in $PlanGuid) {
-            if ($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($planid)) {
-                $planid = $PowerPlanAliases.$planid
+            if ($script:PowerPlanAliases -and $script:PowerPlanAliases.ContainsKey($planid)) {
+                $planid = $script:PowerPlanAliases.$planid
             }
-            if ($PowerPlanSettingAliases -and $PowerPlanSettingAliases.ContainsKey($SettingGuid)) {
-                $SettingGuid = $PowerPlanSettingAliases.$SettingGuid
+            if ($script:PowerPlanSettingAliases -and $script:PowerPlanSettingAliases.ContainsKey($SettingGuid)) {
+                $SettingGuid = $script:PowerPlanSettingAliases.$SettingGuid
             }
             $planid = $planid -replace '[{}]'
             $SettingGuid = $SettingGuid -replace '[{}]'

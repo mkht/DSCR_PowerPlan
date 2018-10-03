@@ -1,6 +1,6 @@
-$script:DataPath = Join-path $PSScriptRoot '\DATA'
-$script:PlanListPath = Join-path $DataPath '\GUID_LIST_PLAN'
-$script:PowerPlanAliases = Get-Content $PlanListPath -Raw | ConvertFrom-StringData
+﻿$script:DataPath = Join-path $PSScriptRoot '\DATA'
+$script:PlanListPath = Join-path $script:DataPath '\GUID_LIST_PLAN'
+$script:PowerPlanAliases = Get-Content $script:PlanListPath -Raw | ConvertFrom-StringData
 
 function Get-TargetResource {
     [CmdletBinding()]
@@ -29,8 +29,8 @@ function Get-TargetResource {
     $ErrorActionPreference = 'Stop'
 
     Write-Verbose "Retrieving Power Plan. { GUID: $GUID }"
-    if ($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)) {
-        $GUID = $PowerPlanAliases.$GUID
+    if ($script:PowerPlanAliases -and $script:PowerPlanAliases.ContainsKey($GUID)) {
+        $GUID = $script:PowerPlanAliases.$GUID
     }
 
     $Plan = @(Get-PowerPlan -GUID $GUID -Verbose:$false)[0]
@@ -84,8 +84,8 @@ function Set-TargetResource {
     )
     $ErrorActionPreference = 'Stop'
 
-    if ($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)) {
-        $GUID = $PowerPlanAliases.$GUID
+    if ($script:PowerPlanAliases -and $script:PowerPlanAliases.ContainsKey($GUID)) {
+        $GUID = $script:PowerPlanAliases.$GUID
     }
 
     try {
@@ -207,8 +207,8 @@ function Test-TargetResource {
     )
 
     Write-Verbose "Test started. { Ensure: $Ensure | GUID: $GUID | Name: $Name | Description: $Description | Active: $Active }"
-    if ($PowerPlanAliases -and $PowerPlanAliases.ContainsKey($GUID)) {
-        $GUID = $PowerPlanAliases.$GUID
+    if ($script:PowerPlanAliases -and $script:PowerPlanAliases.ContainsKey($GUID)) {
+        $GUID = $script:PowerPlanAliases.$GUID
     }
 
     $Result = $false
@@ -252,8 +252,8 @@ function Get-PowerPlan {
         [switch]$All
     )
 
-    if ($PowerPlanAliases.ContainsKey($GUID)) {
-        $GUID = $PowerPlanAliases.$GUID
+    if ($script:PowerPlanAliases.ContainsKey($GUID)) {
+        $GUID = $script:PowerPlanAliases.$GUID
     }
 
     if (($All -eq $true) -or ($GUID -eq 'ALL')) {
