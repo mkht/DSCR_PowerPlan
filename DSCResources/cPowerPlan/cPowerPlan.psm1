@@ -1,4 +1,4 @@
-﻿$script:DataPath = Join-path $PSScriptRoot '\DATA'
+$script:DataPath = Join-path $PSScriptRoot '\DATA'
 $script:PlanListPath = Join-path $DataPath '\GUID_LIST_PLAN'
 $script:PowerPlanAliases = Get-Content $PlanListPath -Raw | ConvertFrom-StringData
 
@@ -246,14 +246,17 @@ function Get-PowerPlan {
         [Parameter(Position = 0, ValueFromPipeline)]
         [Alias('PlanGuid')]
         [AllowEmptyString()]
-        [string]$GUID
+        [string]$GUID,
+
+        [Parameter()]
+        [switch]$All
     )
 
     if ($PowerPlanAliases.ContainsKey($GUID)) {
         $GUID = $PowerPlanAliases.$GUID
     }
 
-    if ($GUID -eq 'ALL') {
+    if (($All -eq $true) -or ($GUID -eq 'ALL')) {
         Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan
     }
     elseif ($GUID) {
