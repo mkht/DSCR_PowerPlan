@@ -1,6 +1,6 @@
-﻿$script:DataPath = Join-path $PSScriptRoot '\DATA'
-$script:PlanListPath = Join-path $script:DataPath '\GUID_LIST_PLAN'
-$script:SettingListPath = Join-path $script:DataPath '\GUID_LIST_SETTING'
+﻿$script:DataPath = Join-Path $PSScriptRoot '\DATA'
+$script:PlanListPath = Join-Path $script:DataPath '\GUID_LIST_PLAN'
+$script:SettingListPath = Join-Path $script:DataPath '\GUID_LIST_SETTING'
 $script:PowerPlanAliases = Get-Content $script:PlanListPath -Raw | ConvertFrom-StringData
 $script:PowerPlanSettingAliases = Get-Content $script:SettingListPath -Raw | ConvertFrom-StringData
 

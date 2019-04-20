@@ -1,5 +1,5 @@
-﻿$script:DataPath = Join-path $PSScriptRoot '\DATA'
-$script:PlanListPath = Join-path $script:DataPath '\GUID_LIST_PLAN'
+$script:DataPath = Join-Path $PSScriptRoot '\DATA'
+$script:PlanListPath = Join-Path $script:DataPath '\GUID_LIST_PLAN'
 $script:PowerPlanAliases = Get-Content $script:PlanListPath -Raw | ConvertFrom-StringData
 
 function Get-TargetResource {
