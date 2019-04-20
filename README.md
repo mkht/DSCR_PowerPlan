@@ -51,7 +51,6 @@ PowerShell DSC Resource for modify Power settings & options.
 
 + [String] **AcDc** (Key):
     + You can choose {`AC` | `DC` | `Both`}
-    + The default value is `Both`
 
 + [UInt32] **Value** (Required):
     + Specifies Power Setting value.
@@ -137,6 +136,9 @@ PS C:\> Set-PowerPlanSetting -PlanGuid 'ACTIVE' -SettingGuid 'LIDACTION' -Value 
 ```
 ----
 ## ChangeLog
+### Unreleased
++ Fix PSSA issues
+
 ### 1.3.0
 + Support new aliases in Windows 10 version 1809 (`PERFEPP1` / `ADVANCEDCOLORQUALITYBIAS`)
 + Add `-All` switch in `Get-PowerPlan`
