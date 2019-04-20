@@ -47,7 +47,7 @@ PowerShell DSC Resource for modify Power settings & options.
 + [String] **PlanGuid** (Key):
     + The GUID of target Power Plan.
     + You can also use aliases. {`ACTIVE` | `ALL` | `SCHEME_MAX` | `SCHEME_MIN` | `SCHEME_BALANCED`}
-    + If you specify the aliase `ALL`, All Power Plans on the current system to be targeted.
+    + If you specify the alias `ALL`, All Power Plans on the current system to be targeted.
 
 + [String] **AcDc** (Key):
     + You can choose {`AC` | `DC` | `Both`}

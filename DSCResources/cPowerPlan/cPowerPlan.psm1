@@ -1,4 +1,4 @@
-$script:DataPath = Join-Path $PSScriptRoot '\DATA'
+﻿$script:DataPath = Join-Path $PSScriptRoot '\DATA'
 $script:PlanListPath = Join-Path $script:DataPath '\GUID_LIST_PLAN'
 $script:PowerPlanAliases = Get-Content $script:PlanListPath -Raw | ConvertFrom-StringData
 
@@ -124,7 +124,7 @@ function Set-TargetResource {
                         $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/CHANGENAME {0} "{1}"' -f $PlanGUID, $Name)).ExitCode
                     }
                     if ($ExitCode -ne 0) {
-                        Write-Error 'Error occured when changing the name of Power Plan'
+                        Write-Error 'Error occurred when changing the name of Power Plan'
                     }
                     Write-Verbose 'The Name of Power Plan has been changed successfully.'
                 }
@@ -161,7 +161,7 @@ function Set-TargetResource {
 
                 $ExitCode = (Start-Command -FilePath 'Powercfg.exe' -ArgumentList ('/CHANGENAME {0} "{1}" "{2}"' -f $GUID, $Name, $Description)).ExitCode
                 if ($ExitCode -ne 0) {
-                    Write-Error 'Error occured when changing the name of Power Plan'
+                    Write-Error 'Error occurred when changing the name of Power Plan'
                 }
 
                 if ($Active) {
