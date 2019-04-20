@@ -95,7 +95,7 @@ function Set-TargetResource {
             $PlanGUID = $Plan.InstanceId.Split('\')[1] -replace '[{}]'
             Write-Verbose ('Removing PowerPlan ({0})' -f $PlanGUID)
             if ($Plan.IsActive) {
-                $NonActivePlan = Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan -Verbose:$false | where {-not $_.IsActive} | select -First 1
+                $NonActivePlan = Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan -Verbose:$false | Where-Object { -not $_.IsActive } | Select-Object -First 1
                 if (-not $NonActivePlan) {
                     Write-Error "Couldn't deactivate the powerplan"
                 }
@@ -137,7 +137,7 @@ function Set-TargetResource {
                     Write-Verbose 'The Power Plan activated.'
                 }
                 elseif ($Plan.IsActive) {
-                    $NonActivePlan = Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan -Verbose:$false | where {-not $_.IsActive} | select -First 1
+                    $NonActivePlan = Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan -Verbose:$false | Where-Object { -not $_.IsActive } | Select-Object -First 1
                     if (-not $NonActivePlan) {
                         Write-Error "Couldn't deactivate the powerplan"
                     }
@@ -260,10 +260,10 @@ function Get-PowerPlan {
         Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan
     }
     elseif ($GUID) {
-        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | Where-Object {$_.InstanceID -match $GUID}
+        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.InstanceID -match $GUID }
     }
     else {
-        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | Where-Object {$_.IsActive}
+        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.IsActive }
     }
 }
 

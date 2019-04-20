@@ -24,7 +24,7 @@ function Get-TargetResource {
         [parameter(Mandatory = $true)]
         [ValidateSet("AC", "DC", "Both")]
         [string]
-        $AcDc = 'Both'
+        $AcDc
     )
     $ErrorActionPreference = 'Stop'
 
@@ -66,7 +66,7 @@ function Set-TargetResource {
         [parameter(Mandatory = $true)]
         [ValidateSet("AC", "DC", "Both")]
         [string]
-        $AcDc = 'Both'
+        $AcDc
     )
     $ErrorActionPreference = 'Stop'
 
@@ -100,13 +100,13 @@ function Test-TargetResource {
         [parameter(Mandatory = $true)]
         [ValidateSet("AC", "DC", "Both")]
         [string]
-        $AcDc = 'Both'
+        $AcDc
     )
     $ErrorActionPreference = 'Stop'
     $Result = $true
 
     Write-Verbose "Test started. { PlanGuid: $PlanGuid | SettingGuid: $SettingGuid | Value: $Value | AcDc: $AcDc }"
-    if ($AcDc -eq 'Both') { $Mode = 'ACDC'}
+    if ($AcDc -eq 'Both') { $Mode = 'ACDC' }
     else { $Mode = $AcDc }
 
     try {
@@ -170,10 +170,10 @@ function Get-PowerPlan {
         Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan
     }
     elseif ($GUID) {
-        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | Where-Object {$_.InstanceID -match $GUID}
+        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.InstanceID -match $GUID }
     }
     else {
-        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | Where-Object {$_.IsActive}
+        Get-CimInstance -Name root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.IsActive }
     }
 }
 
@@ -226,7 +226,7 @@ function Get-PowerPlanSetting {
                 foreach ($Power in ('AC', 'DC')) {
                     $Key = ('{0}Value' -f $Power)
                     $InstanceId = ('Microsoft:PowerSettingDataIndex\{{{0}}}\{1}\{{{2}}}' -f $planid, $Power, $SettingGuid)
-                    $Instance = (Get-CimInstance -Name root\cimv2\power -Class Win32_PowerSettingDataIndex | Where-Object {$_.InstanceID -eq $InstanceId})
+                    $Instance = (Get-CimInstance -Name root\cimv2\power -Class Win32_PowerSettingDataIndex | Where-Object { $_.InstanceID -eq $InstanceId })
                     if (-not $Instance) { Write-Error "Couldn't get power settings"; return }
                     $ReturnValue.$Key = [int]$Instance.SettingIndexValue
                 }
@@ -260,6 +260,7 @@ function Set-PowerPlanSetting {
         [int]
         $Value,
 
+        [parameter()]
         [ValidateSet("AC", "DC", "Both")]
         [string]
         $AcDc = 'Both',
@@ -301,9 +302,9 @@ function Set-PowerPlanSetting {
 
                 foreach ($Power in $Target) {
                     $InstanceId = ('Microsoft:PowerSettingDataIndex\{{{0}}}\{1}\{{{2}}}' -f $planid, $Power, $SettingGuid)
-                    $Instance = Get-CimInstance -Name root\cimv2\power -Class Win32_PowerSettingDataIndex | Where-Object {$_.InstanceID -eq $InstanceId}
+                    $Instance = Get-CimInstance -Name root\cimv2\power -Class Win32_PowerSettingDataIndex | Where-Object { $_.InstanceID -eq $InstanceId }
                     if (-not $Instance) { Write-Error "Couldn't get power settings"; return }
-                    $Instance | ForEach-Object {$_.SettingIndexValue = $Value}
+                    $Instance | ForEach-Object { $_.SettingIndexValue = $Value }
                     Set-CimInstance -CimInstance $Instance
                 }
 
