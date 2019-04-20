@@ -24,7 +24,7 @@
     CompanyName          = ''
 
     # このモジュールの著作権情報
-    Copyright            = '(c) 2018 mkht. All rights reserved.'
+    Copyright            = '(c) 2019 mkht. All rights reserved.'
 
     # このモジュールの機能の説明
     Description          = 'PowerShell DSC Resource for Power Plan configuration'
